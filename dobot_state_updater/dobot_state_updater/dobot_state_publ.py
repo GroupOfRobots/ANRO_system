@@ -7,7 +7,7 @@ from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
 import math
 from contextlib import suppress
-from dobot_msgs.msg import GripperStatus, DobotAlarmCodes
+from dobot_msgs.msg import DobotAlarmCodes
 import os
 from std_msgs.msg import Float64
 
@@ -21,24 +21,16 @@ class DobotPublisher(Node):
         self.publisher_joints_rviz = self.create_publisher(JointState, 'joint_states', 10)
         self.publisher_TCP = self.create_publisher(PoseStamped, 'dobot_TCP', 10)
         self.publisher_alarms = self.create_publisher(DobotAlarmCodes, 'dobot_alarms', 10)
-        self.subscription = self.create_subscription(GripperStatus, 'gripper_status_rviz', self.listener_callback, 10)
         timer_period = 0.05  # 50ms = 20Hz
         self.timer = self.create_timer(timer_period, self.timer_callback)
         timer_period_alarms = 0.1 # 100ms = 10 Hz
         self.timer_alarms = self.create_timer(timer_period_alarms, self.timer_callback_alarms)
         self.br = TransformBroadcaster(self)
-        self.gripper_width = 0.0
         self.RAIL_IN_USE = False
 
         if os.environ.get('MAGICIAN_RAIL_IN_USE') == "true":
             self.RAIL_IN_USE = True
             self.publisher_rail = self.create_publisher(Float64, 'dobot_rail_pose', 10)
-
-    def listener_callback(self, msg):
-        if msg.status == "opened":
-            self.gripper_width = 0.0135
-        elif msg.status == "closed":
-            self.gripper_width = 0.0
 
     def ignore_msg(self):
         bot.serial.reset_input_buffer()
@@ -80,11 +72,11 @@ class DobotPublisher(Node):
             joint_state = JointState()
             now = self.get_clock().now()
             joint_state.header.stamp = now.to_msg()
-            joint_state.name = ['magician_joint_1', 'magician_joint_2', 'magician_joint_3', 'magician_joint_4', 'magician_joint_prismatic_l']
-            joint_state.position = [math.radians(theta1), math.radians(theta2), math.radians(theta3 - theta2), math.radians(theta4), self.gripper_width]
+            joint_state.name = ['magician_joint_1', 'magician_joint_2', 'magician_joint_3', 'magician_joint_4']
+            joint_state.position = [math.radians(theta1), math.radians(theta2), math.radians(theta3 - theta2), math.radians(theta4)]
             # self.get_logger().info("JT1:{0} JT2:{1} JT3:{2} JT4:{3}".format(theta1, theta2, theta3, theta4))
             self.publisher_joints_rviz.publish(joint_state)
-            joint_state.position = [math.radians(theta1), math.radians(theta2), math.radians(theta3), math.radians(theta4), self.gripper_width]
+            joint_state.position = [math.radians(theta1), math.radians(theta2), math.radians(theta3), math.radians(theta4)]
             self.publisher_joints.publish(joint_state)
 
             ####################################################

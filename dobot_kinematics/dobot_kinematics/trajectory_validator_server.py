@@ -33,7 +33,6 @@ class PoseValidatorService(Node):
         self.axis_4_range = {"min": -150, "max": 150}
 
         self.path_to_collision_model = None
-        self.prevent_collision_with_ground = None
 
         # User-defined axis limits
 
@@ -59,12 +58,6 @@ class PoseValidatorService(Node):
 
         # Additional parameters used for collision detection
 
-
-        # Tool type
-        self.declare_parameter('use_ground_collision_detection', rclpy.Parameter.Type.BOOL, 
-        ParameterDescriptor(description = "If ground collision detection is on, then you cannot command the movement to the point where the end tool hits the ground. This option is especially useful during laboratory classes and for beginners :-)"))
-
-
         self.add_on_set_parameters_callback(self.parameters_callback)
 
 
@@ -86,12 +79,6 @@ class PoseValidatorService(Node):
             elif param.name == 'axis_4_range':
                 self.axis_4_range["min"] = param.value[0]
                 self.axis_4_range["max"] = param.value[1]
-                return SetParametersResult(successful=True)
-            elif param.name == "use_ground_collision_detection":
-                if param.value == True:
-                    self.prevent_collision_with_ground = True
-                elif param.value == False:
-                    self.prevent_collision_with_ground = False
                 return SetParametersResult(successful=True)
             else:
                 return SetParametersResult(successful=False)

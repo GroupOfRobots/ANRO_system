@@ -23,7 +23,6 @@ import math
 import tf_transformations
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
-from dobot_msgs.msg import GripperStatus
 import sys
 
 
@@ -63,7 +62,6 @@ class DobotControlPanel(QWidget):
             self.joints_positions_callback,
             10)
 
-        self.gripper_state_publ = self._node.create_publisher(GripperStatus, 'gripper_status_rviz', 10)
 
         self.dobot_current_joint_states = []
 
@@ -291,7 +289,6 @@ class DobotControlPanel(QWidget):
                     command, universal_newlines=True, shell=True,
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
-        self.send_gripper_state("opened")
  
     def close_gripper(self):
         command = 'ros2 service call /dobot_gripper_service dobot_msgs/srv/GripperControl "{gripper_state: "close", keep_compressor_running: false}"'
@@ -299,7 +296,6 @@ class DobotControlPanel(QWidget):
                     command, universal_newlines=True, shell=True,
                     stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 
-        self.send_gripper_state("closed")
 
 
     def turn_on_suction_cup(self):
@@ -393,12 +389,7 @@ class DobotControlPanel(QWidget):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
-    # --------------------------------------------------------
-    def send_gripper_state(self, state):
-        msg = GripperStatus()
-        msg.header.stamp = self._node.get_clock().now().to_msg()
-        msg.status = state
-        self.gripper_state_publ.publish(msg)
+
 
 
           
