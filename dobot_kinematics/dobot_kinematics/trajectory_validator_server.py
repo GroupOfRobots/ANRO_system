@@ -8,7 +8,6 @@ from rcl_interfaces.msg import SetParametersResult, ParameterDescriptor
 import os.path as path
 from geometry_msgs.msg import PoseStamped 
 import tf_transformations
-from dobot_kinematics.collision_detection_server import PyBulletCollisionServer
 import numpy as np
 import os
 
@@ -21,7 +20,6 @@ class PoseValidatorService(Node):
         super().__init__('dobot_trajectory_validation_server')
         self.srv_PTP = self.create_service(EvaluatePTPTrajectory, 'dobot_PTP_validation_service', self.PTP_trajectory_callback)
         self.subscription_TCP = self.create_subscription(PoseStamped, 'dobot_TCP', self.tcp_position_callback, 10)
-        self.collision_server = PyBulletCollisionServer()
 
 
         # TCP pose before motion execution - in order to determine equation of linear trajectory
@@ -120,6 +118,28 @@ class PoseValidatorService(Node):
            return True
         return False
 
+    def linear_trajecory_to_discrete_waypoints(self, start, target, step_len = 0.5):
+        waypoints = []
+
+        x, y, z = [start[0], target[0]], [start[1], target[1]], [start[2], target[2]]
+
+        steps_num = 1
+        while True:
+            dist_now = math.dist([x[0], y[0], z[0]], [x[0] + (x[1]-x[0])*(1/steps_num), y[0] + (y[1]-y[0])*(1/steps_num), z[0] + (z[1]-z[0])*(1/steps_num)])
+            dist_next = math.dist([x[0], y[0], z[0]], [x[0] + (x[1]-x[0])*(1/(steps_num+1)), y[0] + (y[1]-y[0])*(1/(steps_num+1)), z[0] + (z[1]-z[0])*(1/(steps_num+1))])
+
+            if dist_now > step_len and dist_next < step_len:
+                steps_num = steps_num + 3
+                break
+            else:
+                steps_num = steps_num + 1
+
+        for t in range(steps_num-1):
+            t =t / (steps_num-2)
+            waypoints.append([x[0] + (x[1]-x[0])*t, y[0] + (y[1]-y[0])*t, z[0] + (z[1]-z[0])*t])
+
+        return waypoints
+
 
     def is_target_valid(self, target, target_type):
 
@@ -128,9 +148,6 @@ class PoseValidatorService(Node):
             in_limit = self.are_angles_in_range(target)
             if in_limit == False:
                 return (False, 'Joint limits violated')
-            is_trajectory_safe = self.collision_server.validate_trajectory(motion_type = target_type, current_pose = self.dobot_pose, target_point = target, detect_ground = self.prevent_collision_with_ground)
-            if is_trajectory_safe == False:
-                return (False, 'A collision was detected during trajectory validation. The movement cannot be executed.')
             else:
                 return (True, 'Trajectory is safe and feasible.')
             
@@ -138,8 +155,7 @@ class PoseValidatorService(Node):
             xyz = target.tolist()
             cartesian_target = calc_FwdKin(xyz[0], xyz[1], xyz[2])
             cartesian_target_point = [float(cartesian_target[0]), float(cartesian_target[1]), float(cartesian_target[2])]
-            waypoints = self.collision_server.linear_trajecory_to_discrete_waypoints(self.dobot_pose, cartesian_target_point)
-            cartesian_target_list = [float(cartesian_target[0]), float(cartesian_target[1]), float(cartesian_target[2]), xyz[3]]
+            waypoints = self.linear_trajecory_to_discrete_waypoints(self.dobot_pose, cartesian_target_point)
             for point in waypoints:
                 end_tool_rotation = target.tolist()[3]
                 point.append(end_tool_rotation)
@@ -149,11 +165,7 @@ class PoseValidatorService(Node):
                 in_limit = self.are_angles_in_range(angles)
                 if in_limit == False:
                     return (False, 'Joint limits violated')
-            is_trajectory_safe = self.collision_server.validate_trajectory(motion_type = target_type, current_pose = self.dobot_pose, target_point = cartesian_target_list, detect_ground = self.prevent_collision_with_ground)
-            if is_trajectory_safe == False:
-                return (False, 'A collision was detected during trajectory validation. The movement cannot be executed.')
-            else:
-                return (True, 'Trajectory is safe and feasible.')
+            return (True, 'Trajectory is safe and feasible.')
 
 
         # Target expressed in cartesian coordinates
@@ -164,15 +176,12 @@ class PoseValidatorService(Node):
             in_limit = self.are_angles_in_range(angles)
             if in_limit == False:
                 return (False, 'Joint limits violated')
-            is_trajectory_safe = self.collision_server.validate_trajectory(motion_type = target_type, current_pose = self.dobot_pose, target_point = target, detect_ground = self.prevent_collision_with_ground)
-            if is_trajectory_safe == False:
-                return (False, 'A collision was detected during trajectory validation. The movement cannot be executed.')
             else:
                 return (True, 'Trajectory is safe and feasible.')
 
 
         elif target_type == 2:
-            waypoints = self.collision_server.linear_trajecory_to_discrete_waypoints(self.dobot_pose, target)
+            waypoints = self.linear_trajecory_to_discrete_waypoints(self.dobot_pose, target)
             for point in waypoints:
                 end_tool_rotation = target.tolist()[3]
                 point.append(end_tool_rotation)
@@ -182,15 +191,8 @@ class PoseValidatorService(Node):
                 in_limit = self.are_angles_in_range(angles)
                 if in_limit == False:
                     return (False, 'Joint limits violated')
-            is_trajectory_safe = self.collision_server.validate_trajectory(motion_type = target_type, current_pose = self.dobot_pose, target_point = target, detect_ground = self.prevent_collision_with_ground)
-            if is_trajectory_safe == False:
-                return (False, 'A collision was detected during trajectory validation. The movement cannot be executed.')
-            else:
-                return (True, 'Trajectory is safe and feasible.')
+            return (True, 'Trajectory is safe and feasible.')
 
-        elif target_type == "continuous_path": 
-            #TODO
-            pass
         else:
             return (False, 'Wrong trajectory type!')
 

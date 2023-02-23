@@ -20,32 +20,12 @@ def generate_launch_description():
 
 
     # -----------------------------------------------------------------------------------------------------------------
-    # Check if MAGICIAN_TOOL env var has the right value 
-    tool_env_var = str(os.environ.get('MAGICIAN_TOOL'))
-
-    if tool_env_var == "None":
-         sys.exit("MAGICIAN_TOOL env var is not set!")
-
-    if tool_env_var not in ['none', 'pen', 'suction_cup', 'gripper', 'extended_gripper']:
-         sys.exit("MAGICIAN_TOOL env var has an incorrect value!")
-
-    valid_tool=["'", tool_env_var, "' == 'none'", 'or', \
-                "'", tool_env_var, "' == 'pen'", 'or', \
-                "'", tool_env_var, "' == 'suction_cup'", 'or', \
-                "'", tool_env_var, "' == 'gripper'", 'or', \
-                "'", tool_env_var, "' == 'extended_gripper'"
-    ]
-    # -----------------------------------------------------------------------------------------------------------------
-
-
-    # -----------------------------------------------------------------------------------------------------------------
     # Nodes & launch files
 
     tool_null = Node(
         package='dobot_bringup',
         executable='set_tool_null',
-        output='screen',
-        condition = IfCondition(PythonExpression(valid_tool))
+        output='screen'
     )
 
     alarms =ExecuteProcess(
@@ -53,22 +33,19 @@ def generate_launch_description():
             'ros2 ', 'launch ', 'dobot_diagnostics ', 'alarms_analyzer.launch.py'
         ]],
         shell=True,
-        output='log',
-        condition = IfCondition(PythonExpression(valid_tool))
+        output='log'
     )
 
     gripper = Node(
         package='dobot_end_effector',
         executable='gripper_server',
-        output='screen',
-        condition = IfCondition(PythonExpression(valid_tool))
+        output='screen'
     )
 
     suction_cup = Node(
         package='dobot_end_effector',
         executable='suction_cup_server',
         output='screen',
-        condition = IfCondition(PythonExpression(valid_tool))
     )
 
     homing =ExecuteProcess(
@@ -76,8 +53,7 @@ def generate_launch_description():
             'ros2 ', 'launch ', 'dobot_homing ', 'dobot_homing.launch.py'
         ]],
         shell=True,
-        output='screen',
-        condition = IfCondition(PythonExpression(valid_tool))
+        output='screen'
     )
 
     trajectory_validator =ExecuteProcess(
@@ -85,8 +61,7 @@ def generate_launch_description():
             'ros2 ', 'launch ', 'dobot_kinematics ', 'dobot_validate_trajectory.launch.py'
         ]],
         shell=True,
-        output='screen',
-        condition = IfCondition(PythonExpression(valid_tool))
+        output='screen'
     )
 
     PTP_action =ExecuteProcess(
@@ -94,15 +69,13 @@ def generate_launch_description():
             'ros2 ', 'launch ', 'dobot_motion ', 'dobot_PTP.launch.py'
         ]],
         shell=True,
-        output='screen',
-        condition = IfCondition(PythonExpression(valid_tool))
+        output='screen'
     )
 
     robot_state = Node(
         package='dobot_state_updater',
         executable='state_publisher',
-        output='screen',
-        condition = IfCondition(PythonExpression(valid_tool))
+        output='screen'
     )
 
     # -----------------------------------------------------------------------------------------------------------------

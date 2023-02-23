@@ -24,9 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'trajectory_validator_client = dobot_kinematics.trajectory_validator_client:main',
             'trajectory_validator_server = dobot_kinematics.trajectory_validator_server:main',
-            'fkin_test = examples.fkin_test:main',
         ],
     },
 )
