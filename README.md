@@ -20,6 +20,11 @@ colcon build
 
 # Checklist :white_check_mark:
 
+## Connection test:
+```
+ros2 run dobot_bringup connection_test 
+```
+
 ## dobot_bringup 
 ```
 ros2 launch dobot_bringup dobot_magician_control_system.launch.py
@@ -51,7 +56,11 @@ ros2 service call /dobot_homing_service dobot_msgs/srv/ExecuteHomingProcedure
 ros2 param get /dobot_homing_srv homing_position  
 ros2 param set /dobot_homing_srv homing_position [150.0,0.0,100.0,0.0]
 ```
-## dobot_kinematics 
+## dobot_kinematics  
+Sprawdzić:
+* (False, 'Joint limits violated')
+* (True, 'Trajectory is safe and feasible.')
+* (False, 'Inv Kin solving error!')
 ## dobot_motion 
 - wszystkie tryby (4) 
 - modyfikacja ratio 
