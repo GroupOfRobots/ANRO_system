@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'set_tool_null = dobot_bringup.set_tool_null:main',
+            'connection_test = dobot_bringup.connection_test:main',
         ],
     },
 )
