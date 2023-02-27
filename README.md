@@ -21,15 +21,13 @@ colcon build
 rm -r build log src 
 echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
 echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc` (number between 0 and 101, inclusive)
-sudo adduser student dialout
+sudo adduser student dialout (restart system to apply changes)
 ```
 
 
 
 * `rqt --force-discover`
 * 
-(delete downloaded zip file from trash)
-
 
 # Checklist :white_check_mark:
 
