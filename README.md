@@ -1,7 +1,7 @@
 # Konfiguracja P109
 ```
 source /opt/ros/humble/setup.bash
-mkdir -p ~/magician_ros2_control_system_ws/src
+mkdir -p ~/dobot_anro_system/src
 git clone <link-to-github-repository> ~/magician_ros2_control_system_ws/src
 cd magician_ros2_control_system_ws
 rosdep install -i --from-path src --rosdistro humble -y
