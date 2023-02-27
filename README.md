@@ -2,27 +2,33 @@
 ```
 source /opt/ros/humble/setup.bash
 mkdir -p ~/dobot_anro_system/src
-git clone <link-to-github-repository> ~/magician_ros2_control_system_ws/src
-cd magician_ros2_control_system_ws
-(if necessary)
+git clone <link-to-github-repository> ~/dobot_anro_system/src
+cd dobot_anro_system
+(if necessary) 
 ***
 sudo rosdep init
 rosdep update
 ***
 rosdep install -i --from-path src --rosdistro humble -y
+sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor python3-pykdl
+cd src
+sudo apt update
+sudo apt upgrade
+sudo apt install python3-pip
+pip3 install -r requirements.txt
+cd ..
 colcon build
+rm -r build log src 
+echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
+echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc` (number between 0 and 101, inclusive)
+sudo adduser student dialout
 ```
-(delete all dirs in workspace except /install dir)
-
-dialout ? 
 
 
 
-* `echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc` (number between 0 and 101, inclusive)
-* `echo "source /home/student/magician_ros2_control_system_ws/install/setup.bash" >> ~/.bashrc`
-* `pip3 install -r requirements.txt`
-* `sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor python3-pykdl` 
 * `rqt --force-discover`
+* 
+(delete downloaded zip file from trash)
 
 
 # Checklist :white_check_mark:
