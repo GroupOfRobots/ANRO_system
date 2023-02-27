@@ -10,9 +10,7 @@ rosdep install -i --from-path src --rosdistro humble -y
 sudo apt update
 sudo apt upgrade
 sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor ros-humble-tf-transformations python3-pykdl python3-pip
-cd src
-pip3 install -r requirements.txt
-cd ..
+pip3 install -r src/requirements.txt
 colcon build
 rm -r build log src 
 echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
