@@ -9,6 +9,8 @@ colcon build
 ```
 (delete all dirs in workspace except /install dir)
 
+dialout ? 
+
 
 
 * `echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc` (number between 0 and 101, inclusive)
