@@ -4,17 +4,13 @@ source /opt/ros/humble/setup.bash
 mkdir -p ~/dobot_anro_system/src
 git clone <link-to-github-repository> ~/dobot_anro_system/src
 cd dobot_anro_system
-(if necessary) 
-***
-sudo rosdep init
-rosdep update
-***
+sudo rosdep init (if necessary)
+rosdep update (if necessary)
 rosdep install -i --from-path src --rosdistro humble -y
-sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor python3-pykdl
-cd src
 sudo apt update
 sudo apt upgrade
-sudo apt install python3-pip
+sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor ros-humble-tf-transformations python3-pykdl python3-pip
+cd src
 pip3 install -r requirements.txt
 cd ..
 colcon build
@@ -22,12 +18,8 @@ rm -r build log src
 echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
 echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc` (number between 0 and 101, inclusive)
 sudo adduser student dialout (restart system to apply changes)
+rqt --force-discover
 ```
-
-
-
-* `rqt --force-discover`
-* 
 
 # Checklist :white_check_mark:
 
