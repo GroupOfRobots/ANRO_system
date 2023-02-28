@@ -21,12 +21,12 @@ rqt --force-discover
 
 # Checklist :white_check_mark:
 
-## Connection test :star:
+## Connection test 
 ```
 ros2 run dobot_bringup connection_test 
 ```
 
-## dobot_bringup :star:
+## dobot_bringup 
 ```
 ros2 launch dobot_bringup dobot_magician_control_system.launch.py
 ```
@@ -36,12 +36,12 @@ ros2 launch dobot_bringup dobot_magician_control_system.launch.py
 rqt -s dobot_control_panel
 ```
 
-## dobot_diagnostics :star:
+## dobot_diagnostics 
 ```
 rqt -s rqt_robot_monitor
 ```
 
-## dobot_end_effector :star:
+## dobot_end_effector 
 Sprawdzić wszystkie kombinacje: 
 ```
 ros2 service call /dobot_gripper_service dobot_msgs/srv/GripperControl "{gripper_state: 'open', keep_compressor_running: true}"
@@ -77,11 +77,11 @@ ros2 param get /dobot_PTP_server JT3_vel
 ros2 param set /dobot_PTP_server JT3_vel 80    
 ros2 param describe /dobot_PTP_server TCP_vel 
 ```
-## dobot_msgs :star:
+## dobot_msgs 
 ```
 ros2 interface show <msg_type>
 ```
-## dobot_state_updater :star:
+## dobot_state_updater 
 ```
 ros2 topic echo <topic_name>
 ```
