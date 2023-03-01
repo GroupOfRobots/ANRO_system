@@ -1,9 +1,19 @@
-# Konfiguracja P109
+# Konfiguracja P109 (instalacja w /opt)
 ```
+cd /opt
+su administrator
+sudo mkdir dobot_anro_system
+download .zip -> Extract Here -> Delete .zip
+exit
+cd
+su administrator
+sudo mv Downloads/ANRO_system-main/ /opt/dobot_anro_system/
+cd
+cd /opt
+su administrator
+cd dobot_anro_system/
+sudo mv ANRO_system-main/ src
 source /opt/ros/humble/setup.bash
-mkdir -p ~/dobot_anro_system/src
-git clone <link-to-github-repository> ~/dobot_anro_system/src
-cd dobot_anro_system
 sudo rosdep init (if necessary)
 rosdep update (if necessary)
 rosdep install -i --from-path src --rosdistro humble -y
@@ -11,8 +21,26 @@ sudo apt update
 sudo apt upgrade
 sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor ros-humble-tf-transformations python3-pykdl python3-pip
 pip3 install -r src/requirements.txt
+exit
+pip3 install -r src/requirements.txt
+su administrator
+cd ..
+sudo rm -r dobot_anro_system/
+exit
+cd
+source /opt/ros/humble/setup.bash
+cd dobot_anro_system/
+rosdep update
+rosdep install -i --from-path src --rosdistro humble -y
 colcon build
 rm -r build log src 
+rm -r src/
+delete python scripts from /install (also remove them from Trash)
+su administrator 
+cd
+with File Manager copy
+
+
 echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
 echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc (number between 0 and 101, inclusive)
 sudo adduser student dialout (restart system to apply changes)
