@@ -40,6 +40,8 @@ su administrator
 cd
 with File Manager copy
 
+source /opt/dobot_anro_system/install/setup.bash
+
 
 echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
 echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc (number between 0 and 101, inclusive)
