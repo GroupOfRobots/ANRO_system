@@ -39,14 +39,14 @@ delete python scripts from /install (also remove them from Trash)
 su administrator 
 cd
 with File Manager copy
+sudo adduser student dialout (restart system to apply changes)
+rqt --force-discover
 
 source /opt/dobot_anro_system/install/setup.bash
 
 
 echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
 echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc (number between 0 and 101, inclusive)
-sudo adduser student dialout (restart system to apply changes)
-rqt --force-discover
 ```
 
 # Checklist :white_check_mark:
