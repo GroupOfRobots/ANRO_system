@@ -1,10 +1,14 @@
 from setuptools import setup
 import os
 from glob import glob
+from Cython.Build import cythonize
 
 package_name = 'dobot_kinematics'
 
+files = package_name + "/*.py"
+
 setup(
+    ext_modules=cythonize(files,compiler_directives={'language_level' : "3"},force=True,quiet=True),
     name=package_name,
     version='0.0.0',
     packages=[package_name],
@@ -15,7 +19,7 @@ setup(
         (os.path.join('share', package_name), glob('launch/*.launch.py')),
         (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', "wheel",  "Cython"],
     zip_safe=True,
     maintainer='jkaniuka',
     maintainer_email='jkaniuka@todo.todo',
