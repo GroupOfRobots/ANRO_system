@@ -49,6 +49,12 @@ echo "source /home/student/dobot_anro_system/install/setup.bash" >> ~/.bashrc
 echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc (number between 0 and 101, inclusive)
 ```
 
+# p109 directory
+```
+sudo chmod 700 clean.sh
+sudo bash /opt/p109/clean.sh
+```
+
 # Checklist :white_check_mark:
 
 ## Connection test :star:
