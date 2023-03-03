@@ -53,6 +53,14 @@ echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc (number between 0 and 101, inclusi
 ```
 sudo chmod 700 clean.sh
 sudo bash /opt/p109/clean.sh
+source /opt/p109/anro.sh 
+```
+
+# anro.sh
+```
+#!/bin/bash
+echo "source /opt/dobot_anro_system/install/setup.bash" >> ~/.bashrc
+echo "export ROS_LOCALHOST_ONLY=1" >> ~/.bashrc
 ```
 
 # Checklist :white_check_mark:
