@@ -51,8 +51,6 @@ echo "export ROS_DOMAIN_ID=<id>" >> ~/.bashrc (number between 0 and 101, inclusi
 
 # p109 directory
 ```
-sudo chmod 700 clean.sh
-sudo bash /opt/p109/clean.sh
 source /opt/p109/anro.sh 
 ```
 
