@@ -14,7 +14,9 @@ source /opt/ros/humble/setup.bash
 mkdir -p ~/dobot_anro_system/src
 cd dobot_anro_system/
 git clone <link_to_system_repo> src/
-pip3 install -r src/requirements.txt
+su administrator
+sudo pip3 install -r src/requirements.txt
+exit
 rosdep install -i --from-path src --rosdistro humble -y
 ```
 :warning: Jeśli po wykonaniu ostatniej z powyższych komend wyświetli się komunikat `ERROR: your rosdep installation has not been initialized yet.`, wpisz kolejno w konsoli poniższe komendy: 
