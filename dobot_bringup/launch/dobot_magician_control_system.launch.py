@@ -56,13 +56,6 @@ def generate_launch_description():
         output='screen'
     )
 
-    trajectory_validator =ExecuteProcess(
-        cmd=[[
-            'ros2 ', 'launch ', 'dobot_kinematics ', 'dobot_validate_trajectory.launch.py'
-        ]],
-        shell=True,
-        output='screen'
-    )
 
     PTP_action =ExecuteProcess(
         cmd=[[
@@ -129,15 +122,6 @@ def generate_launch_description():
         )
     )
 
-    trajectory_validator_event = RegisterEventHandler(
-        OnProcessStart(
-            target_action=trajectory_validator,
-            on_start=[
-                LogInfo(msg='Strating trajectory validator service.'),
-                LogInfo(msg='Loading kinematics parameters.')
-            ]
-        )
-    )
     PTP_action_event = RegisterEventHandler(
         OnProcessStart(
             target_action=PTP_action,
@@ -202,10 +186,6 @@ def generate_launch_description():
         actions=[homing]
         )
 
-    trajectory_validator_sched = TimerAction(
-        period=5.0,
-        actions=[trajectory_validator]
-        )
 
     PTP_action_sched = TimerAction(
         period=7.0,
@@ -226,7 +206,6 @@ def generate_launch_description():
         gripper_event,
         suction_cup_event,
         homing_event,
-        trajectory_validator_event,
         PTP_action_event,
         robot_state_event,
         tool_null_sched,
@@ -234,7 +213,6 @@ def generate_launch_description():
         gripper_sched,
         suction_cup_sched,
         homing_sched,
-        trajectory_validator_sched,
         PTP_action_sched,
         robot_state_sched,
         on_shutdown

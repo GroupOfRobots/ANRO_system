@@ -13,7 +13,10 @@ from dobot_driver.dobot_handle import bot
 from .PTP_params_class import declare_PTP_params
 from rcl_interfaces.msg import SetParametersResult
 from threading import Thread
-from dobot_msgs.srv import EvaluatePTPTrajectory
+
+## Validation imports
+from dobot_motion.dobot_inv_kin import calc_inv_kin
+from dobot_motion.dobot_forward_kin import calc_FwdKin
 
 class DobotPTPServer(Node):
 
@@ -41,13 +44,6 @@ class DobotPTPServer(Node):
             self.tcp_position_callback,
             10)
 
-        # Check if goal/trajectory is feasible
-        self.client_validate_goal = self.create_client(srv_type = EvaluatePTPTrajectory, 
-                                                        srv_name = 'dobot_PTP_validation_service', 
-                                                        callback_group=ReentrantCallbackGroup())
-        while not self.client_validate_goal.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('Trajectory validation service not available, waiting again...')
-
 
         self.motion_type = None 
         self.target = [] 
@@ -74,6 +70,117 @@ class DobotPTPServer(Node):
 
 
         self.add_on_set_parameters_callback(self.parameters_callback)
+
+        # VALIDATION
+
+        self.axis_1_range = {"min": -125, "max": 125}
+        self.axis_2_range = {"min": -5, "max": 90}
+        self.axis_3_range = {"min": -15, "max": 70}
+        self.axis_4_range = {"min": -150, "max": 150}
+
+        # TCP pose before motion execution - in order to determine equation of linear trajectory
+        self.dobot_pose_val = [] 
+
+        self.trajectory_points = []
+
+        self.subscription_TCP = self.create_subscription(PoseStamped, 'dobot_TCP', self.tcp_position_callback_val, 10)
+
+
+    ###################################################################################################
+    # Trajectory validation
+
+    def tcp_position_callback_val(self, msg):
+            quat = (msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w)
+            _, _, y = tf_transformations.euler_from_quaternion(quat)
+            self.dobot_pose_val = [float(msg.pose.position.x)*1000, float(msg.pose.position.y)*1000, float(msg.pose.position.z)*1000, float(math.degrees(y))]
+
+    def are_angles_in_range(self, angles):
+        if (self.axis_1_range["min"] < angles[0] < self.axis_1_range["max"]) and \
+           (self.axis_2_range["min"] < angles[1] < self.axis_2_range["max"]) and \
+           (self.axis_3_range["min"] < angles[2] < self.axis_3_range["max"]) and \
+           (self.axis_4_range["min"] < angles[3] < self.axis_4_range["max"]):
+           return True
+        return False
+    
+    def linear_trajecory_to_discrete_waypoints(self, start, target, step_len = 0.5):
+        waypoints = []
+
+        x, y, z = [start[0], target[0]], [start[1], target[1]], [start[2], target[2]]
+
+        steps_num = 1
+        while True:
+            dist_now = math.dist([x[0], y[0], z[0]], [x[0] + (x[1]-x[0])*(1/steps_num), y[0] + (y[1]-y[0])*(1/steps_num), z[0] + (z[1]-z[0])*(1/steps_num)])
+            dist_next = math.dist([x[0], y[0], z[0]], [x[0] + (x[1]-x[0])*(1/(steps_num+1)), y[0] + (y[1]-y[0])*(1/(steps_num+1)), z[0] + (z[1]-z[0])*(1/(steps_num+1))])
+
+            if dist_now > step_len and dist_next < step_len:
+                steps_num = steps_num + 3
+                break
+            else:
+                steps_num = steps_num + 1
+
+        for t in range(steps_num-1):
+            t =t / (steps_num-2)
+            waypoints.append([x[0] + (x[1]-x[0])*t, y[0] + (y[1]-y[0])*t, z[0] + (z[1]-z[0])*t])
+
+        return waypoints
+    
+    def is_target_valid(self, target, target_type):
+
+        # Target expressed in joint coordinates
+        if target_type == 4:
+            in_limit = self.are_angles_in_range(target)
+            if in_limit == False:
+                return (False, 'Joint limits violated')
+            else:
+                return (True, 'Trajectory is safe and feasible.')
+            
+        elif target_type == 5:
+            xyz = target.tolist()
+            cartesian_target = calc_FwdKin(xyz[0], xyz[1], xyz[2])
+            cartesian_target_point = [float(cartesian_target[0]), float(cartesian_target[1]), float(cartesian_target[2])]
+            waypoints = self.linear_trajecory_to_discrete_waypoints(self.dobot_pose_val, cartesian_target_point)
+            for point in waypoints:
+                end_tool_rotation = target.tolist()[3]
+                point.append(end_tool_rotation)
+                angles = calc_inv_kin(*point)
+                if angles == False:
+                    return (False, 'Inv Kin solving error!')
+                in_limit = self.are_angles_in_range(angles)
+                if in_limit == False:
+                    return (False, 'Joint limits violated')
+            return (True, 'Trajectory is safe and feasible.')
+
+
+        # Target expressed in cartesian coordinates
+        elif target_type == 1:
+            angles = calc_inv_kin(*target)
+            if angles == False:
+                return (False, 'Inv Kin solving error!')
+            in_limit = self.are_angles_in_range(angles)
+            if in_limit == False:
+                return (False, 'Joint limits violated')
+            else:
+                return (True, 'Trajectory is safe and feasible.')
+
+
+        elif target_type == 2:
+            waypoints = self.linear_trajecory_to_discrete_waypoints(self.dobot_pose_val, target)
+            for point in waypoints:
+                end_tool_rotation = target.tolist()[3]
+                point.append(end_tool_rotation)
+                angles = calc_inv_kin(*point)
+                if angles == False:
+                    return (False, 'Inv Kin solving error!')
+                in_limit = self.are_angles_in_range(angles)
+                if in_limit == False:
+                    return (False, 'Joint limits violated')
+            return (True, 'Trajectory is safe and feasible.')
+
+        else:
+            return (False, 'Wrong trajectory type!')
+
+
+    ###################################################################################################
 
     def set_initial_params_values(self):
             self.set_joint_params_thread.start()
@@ -148,12 +255,6 @@ class DobotPTPServer(Node):
 
         return SetParametersResult(successful=True)
 
-    def send_request_check_trajectory(self, target_point, type):
-        self.req_validate = EvaluatePTPTrajectory.Request()
-        self.req_validate.target = target_point
-        self.req_validate.motion_type = type
-        return self.client_validate_goal.call(self.req_validate)
-
 
     def joints_positions_callback(self, msg):
         if self.motion_type in [3, 4, 5, 6]:
@@ -186,12 +287,12 @@ class DobotPTPServer(Node):
         self.target = goal_request.target_pose
         self.motion_type = goal_request.motion_type
 
-        validation_response = self.send_request_check_trajectory(self.target, self.motion_type)
-        if validation_response.is_valid == False:
+        validation_response = self.is_target_valid(self.target, self.motion_type)
+        if validation_response[0] == False:
             self.get_logger().warn("Goal rejected: {0}".format(validation_response))
             return GoalResponse.REJECT
 
-        self.get_logger().info("Result of calling validation service: is valid? {0}, description: {1}".format(validation_response.is_valid, validation_response.message))
+        self.get_logger().info("Result of calling validation service: is valid? {0}, description: {1}".format(validation_response[0], validation_response[1]))
 
 
 
