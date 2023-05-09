@@ -6,3 +6,4 @@ python_qt_binding==0.3.4
 setuptools==58.2.0
 transforms3d==0.4.1
 Cython==0.29.33
+mathutils==3.3.0
