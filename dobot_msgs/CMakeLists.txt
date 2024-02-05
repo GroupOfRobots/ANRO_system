@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/PointToPoint.action"
   "msg/DobotAlarmCodes.msg"
   "srv/ExecuteHomingProcedure.srv"
+  "srv/ExecuteAlarmClear.srv"
   "srv/GripperControl.srv"
   "srv/SuctionCupControl.srv"
   DEPENDENCIES std_msgs geometry_msgs

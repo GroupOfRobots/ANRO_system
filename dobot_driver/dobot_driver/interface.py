@@ -32,7 +32,7 @@ class Interface:
         self.lock.release()
         if response is None:
             pass
-        else: 
+        else:
             return response.params
 
     def send_only(self, message):

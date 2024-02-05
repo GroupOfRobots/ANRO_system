@@ -20,12 +20,17 @@ def generate_launch_description():
     diag_publisher = launch_ros.actions.Node(
         package='dobot_diagnostics',
         executable='alarms_parser')
+    alarm_clear_srv = launch_ros.actions.Node(
+        package='dobot_diagnostics',
+        executable='alarm_clear',
+        output='screen')
     return launch.LaunchDescription([
         aggregator,
         diag_publisher,
+        alarm_clear_srv,
         launch.actions.RegisterEventHandler(
             event_handler=launch.event_handlers.OnProcessExit(
                 target_action=aggregator,
                 on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
-            )),
+            ))
     ])
