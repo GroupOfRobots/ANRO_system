@@ -5,7 +5,7 @@
 su administrator
 sudo apt update
 sudo apt upgrade
-sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor ros-humble-tf-transformations ros-humble-urdf-tutorial python3-pykdl python3-pip
+sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor ros-humble-tf-transformations ros-humble-urdf-tutorial python3-pykdl python3-pip python3-rosdep2 python3-colcon-common-extensions
 exit
 ```
 ## Utworzenie przestrzeni roboczej oraz pobranie kodów źródłowych systemu z _GitHub'a_: 
