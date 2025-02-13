@@ -1,23 +1,28 @@
 # Instrukcja instalacji systemu sterowania manipulatora _Dobot Magician_ na bazie framework'a ROS 2 w laboratorium P109 
 
+## Instalacja ROS Jazzy
+
+Na początku należy zainstalować odpowiednią dystrybucję frameworka ROS, zgodnie z instrukcją:
+[https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html)
+
 ## Aktualizacja i instalacja pakietów z repozytorium _apt_: 
 ```
 su administrator
 sudo apt update
 sudo apt upgrade
-sudo apt install ros-humble-diagnostic-aggregator ros-humble-rqt-robot-monitor ros-humble-tf-transformations ros-humble-urdf-tutorial python3-pykdl python3-pip python3-rosdep2 python3-colcon-common-extensions
+sudo apt install ros-jazzy-diagnostic-aggregator ros-jazzy-rqt-robot-monitor ros-jazzy-tf-transformations ros-jazzy-urdf-tutorial ros-jazzy-python-qt-binding python3-pykdl python3-pip python3-colcon-common-extensions
 exit
 ```
 ## Utworzenie przestrzeni roboczej oraz pobranie kodów źródłowych systemu z _GitHub'a_: 
 ```
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 mkdir -p ~/dobot_anro_system/src
 cd dobot_anro_system/
-git clone <link_to_system_repo> src/
+git clone -b fszyszko2 https://github.com/GroupOfRobots/magician_ros2.git src/
 su administrator
-sudo pip3 install -r src/requirements.txt
+sudo pip3 install --break-system-packages -r src/requirements.txt
 exit
-rosdep install -i --from-path src --rosdistro humble -y
+rosdep install -i --from-path src --rosdistro jazzy -y
 ```
 :warning: Jeśli po wykonaniu ostatniej z powyższych komend wyświetli się komunikat `ERROR: your rosdep installation has not been initialized yet.`, wpisz kolejno w konsoli poniższe komendy: 
 ```
@@ -27,23 +32,17 @@ rosdep update
 exit
 ```
 
-## Budowanie systemu oraz skasowanie plików źródłowych: 
+## Budowanie systemu oraz skasowanie plików źródłowych oraz przeniesienie systemu sterowania do katalogu _/opt_: 
 ```
 rosdep update
-rosdep install -i --from-path src --rosdistro humble -y
+rosdep install -i --from-path src --rosdistro jazzy -y
 colcon build
-rm -r build/ log/ 
-python3 src/cleaner.py
 su administrator
-sudo rm -r src/
+sudo rm -rf build/ log/ src/
+cd .. && sudo mv dobot_anro_system/ /opt/dobot_anro_system/
 exit
 ```
-## Przeniesienie systemu sterowania do katalogu _/opt_:
-Należy otworzyć dwa okna menedżera plików. W jednym z nich należy się zalogować jako `administrator`. Można to osiągnąć poprzez próbę otwarcia katalogu, do którego użytkownik `student` nie ma dostępu. Przy próbie otwarcia takiego katalogu należy dwukrotnie podać hasło użytkownika `administrator`. Następnie należy przenieść katalog `/dobot_anro_system` do katalogu `/opt` i usunąć katalog `/dobot_anro_system`, który pozostał w katalogu `home` - będąc w tej samej konsoli wpisz w tym celu dwa poniższe polecenia: 
-```
-cd
-rm -r dobot_anro_system/
-```
+
 ## Dodanie użytkownika do grupy _dialout_: 
 ```
 su administrator
@@ -71,5 +70,5 @@ Skopiuj do pliku _anro.sh_ poniższy skrypt _bash'owy_, zapisz zmiany i zamknij 
 ```
 #!/bin/bash
 echo "source /opt/dobot_anro_system/install/setup.bash" >> ~/.bashrc
-echo "export ROS_LOCALHOST_ONLY=1" >> ~/.bashrc
+echo "export ROS_AUTOMATIC_RANGE_DISCOVERY=LOCALHOST" >> ~/.bashrc
 ```
